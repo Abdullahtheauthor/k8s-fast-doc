@@ -1,0 +1,4 @@
+This is used to deploy lamp stack using "index.php". This file should be put in the nginx container under /app. Also, alot of secrets should be created.
+For example for creating a secret:
+kubectl create secret generic mysql-host --from-literal=host=mysql-service
+
