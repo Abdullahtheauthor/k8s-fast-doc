@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lemp-wp
+  labels:
+    app: lamp-wp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lamp-wp
+  template:
+    metadata:
+      labels:
+        app: lamp-wp
+    spec:
+      containers:
+      - name: nginx-php-container
+        image: webdevops/php-nginx:alpine-3-php7
+        ports:
+        - containerPort: 80
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-root-pass
+              key: password
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-user-pass 
+              key: password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-db-url
+              key: database
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-user-pass
+              key: username
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mysql-host
+              key: host
+        volumeMounts:
+        - name: php-co
+          mountPath: /opt/docker/etc/php/php.ini
+          subPath: php.ini
+      - name: mysql-container
+        image: mysql:5.6
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-root-pass
+              key: password
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-user-pass
+              key: password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-db-url
+              key: database
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-user-pass
+              key: username
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mysql-host
+              key: host
+      volumes:
+      - name: php-co
+        configMap:
+          name: php-config
